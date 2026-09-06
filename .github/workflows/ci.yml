@@ -34,7 +34,7 @@ defaults:
 env:
   # The one variable that separates the arms: on baseline, action-checkout
   # skips its Set up Chalk step entirely.
-  CHALK_ON: ${{ github.event_name == 'workflow_dispatch' && inputs.leg != 'baseline' }}
+  CHALK_ON: ${{ inputs.leg == 'instrumented' }}
 
 run-name: "CI ${{ inputs.leg || 'push' }} ${{ inputs.racecar_run }}"
 
@@ -64,7 +64,7 @@ jobs:
       - run: npx hereby build:api
 
   release-build:
-    if: ${{ github.repository == 'microsoft/TypeScript' && github.event_name != 'merge_group' }}
+    if: ${{ github.repository == 'curiosity-tests/TypeScript' && 'push' != 'merge_group' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -181,7 +181,7 @@ jobs:
             name: 'concurrent test programs'
             concurrent-test-programs: true
             coverage: true
-            skip: ${{ github.event_name == 'merge_group' }}
+            skip: ${{ 'push' == 'merge_group' }}
         exclude:
           - config:
               skip: true
@@ -195,7 +195,7 @@ jobs:
       TSGO_HEREBY_RACE: ${{ (matrix.config.race && 'true') || 'false' }}
       TSGO_HEREBY_NOEMBED: ${{ (matrix.config.noembed && 'true') || 'false' }}
       TSGO_HEREBY_CONCURRENT_TEST_PROGRAMS: ${{ (matrix.config.concurrent-test-programs && 'true') || 'false' }}
-      TSGO_HEREBY_COVERAGE: ${{ (matrix.config.coverage && github.event_name != 'merge_group' && 'true') || 'false' }}
+      TSGO_HEREBY_COVERAGE: ${{ (matrix.config.coverage && 'push' != 'merge_group' && 'true') || 'false' }}
     steps:
       - run: git config --system core.longpaths true
         if: ${{ matrix.config.os == 'windows' }}
@@ -233,9 +233,9 @@ jobs:
         run: npx hereby test:benchmarks
       - run: git add .
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
-        if: ${{ always() && matrix.config.coverage && github.event_name != 'merge_group' }}
+        if: ${{ always() && matrix.config.coverage && 'push' != 'merge_group' }}
         with:
-          use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
+          use_oidc: ${{ !('push' == 'pull_request' && github.event.pull_request.head.repo.fork) }}
           name: ${{ matrix.config.name || matrix.config.runner }}
           directory: ./coverage
       - run: git diff --staged --exit-code --stat
@@ -270,7 +270,7 @@ jobs:
       id-token: write
       contents: read
     env:
-      TSGO_HEREBY_COVERAGE: ${{ (matrix.config.coverage && github.event_name != 'merge_group' && 'true') || 'false' }}
+      TSGO_HEREBY_COVERAGE: ${{ (matrix.config.coverage && 'push' != 'merge_group' && 'true') || 'false' }}
     steps:
       - run: git config --system core.longpaths true
         if: ${{ matrix.config.os == 'windows' }}
@@ -306,9 +306,9 @@ jobs:
       - run: npx hereby test:api
       - run: git add .
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
-        if: ${{ always() && matrix.config.coverage && github.event_name != 'merge_group' }}
+        if: ${{ always() && matrix.config.coverage && 'push' != 'merge_group' }}
         with:
-          use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
+          use_oidc: ${{ !('push' == 'pull_request' && github.event.pull_request.head.repo.fork) }}
           name: extra-${{ matrix.config.runner }}
           directory: ./coverage
       - run: git diff --staged --exit-code --stat
@@ -325,7 +325,7 @@ jobs:
             os: linux
             name: 'noembed'
             noembed: true
-            skip: ${{ github.event_name == 'merge_group' }}
+            skip: ${{ 'push' == 'merge_group' }}
         exclude:
           - config:
               skip: true
