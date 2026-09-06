@@ -64,7 +64,7 @@ jobs:
       - run: npx hereby build:api
 
   release-build:
-    if: ${{ github.repository == 'curiosity-tests/TypeScript' && 'push' != 'merge_group' }}
+    if: ${{ github.repository == 'microsoft/TypeScript' && 'push' != 'merge_group' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
