@@ -1,12 +1,11 @@
 name: CodeQL
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, main-ts7, ts7-release, release-*]
   pull_request:
     branches: [main, main-ts7, ts7-release, release-*]
-  schedule:
-    - cron: '30 1 * * 0'
 
 permissions:
   contents: read
